@@ -1,162 +1,231 @@
-# ESP32 BLE Keyboard library
+[EOT]
+# ESP32-BLE-Combo库  
+## 1. 为什么创建这个库?  
+网上搜到的ESP32键鼠库太老了,在我的手机上只能连接一次,蓝牙一掉就没法重新连接了,所以参考ESP32-BLE-Keyboard库和网上老的ESP32-BLE-Combo重写了一个键鼠库  
 
-This library allows you to make the ESP32 act as a Bluetooth Keyboard and control what it does.  
-You might also be interested in:
-- [ESP32-BLE-Mouse](https://github.com/T-vK/ESP32-BLE-Mouse)
-- [ESP32-BLE-Gamepad](https://github.com/lemmingDev/ESP32-BLE-Gamepad)
+## 2. 这个库实现了什么?  
+**键盘功能:**  
+ESP32-BLE-Keyboard的所有功能  
+
+**鼠标功能:**  
+鼠标点击,移动,滚轮功能,按下,释放功能  
+
+## 3. 函数列表  
+**BLECombo类:**  
+构造函数: `BLECombo(std::string deviceName = "Francis Combo", std::string deviceManufacturer = "IXYsoft", uint8_t batteryLevel = 100)`  
+```
+参数:
+deviceName: 设备名称,搜索蓝牙时显示的名字
+deviceManufacturer: 设备制造商
+batteryLevel: 电池电量
+```
+
+函数: `BleMouse* mouse()`  
+说明: 获取鼠标对象指针
+
+函数: `BleKeyboard* keyboard()`  
+说明: 获取键盘对象指针
+
+函数: `bool isConnected(void)`  
+说明: 判断键鼠库是否连接  
+
+函数: `void setBatteryLevel(uint8_t level)`  
+说明: 设置电池电量(0~100)  
+
+函数: `void setName(std::string name)`  
+说明: 设置设备名称  
+
+函数: `void begin(void)`  
+说明: 初始化键鼠库  
+
+函数: `void end(void)`  
+说明: 关闭键鼠库  
 
 
-## Features
+**鼠标类:BleMouse**  
+```
+常量:
+MOUSE_LEFT      左键
+MOUSE_RIGHT     右键
+MOUSE_MIDDLE    中键
+MOUSE_BACK      后退键
+MOUSE_FORWARD   前进键
+MOUSE_ALL       全部按键
+```
 
- - [x] Send key strokes
- - [x] Send text
- - [x] Press/release individual keys
- - [x] Media keys are supported
- - [ ] Read Numlock/Capslock/Scrolllock state
- - [x] Set battery level (basically works, but doesn't show up in Android's status bar)
- - [x] Compatible with Android
- - [x] Compatible with Windows
- - [x] Compatible with Linux
- - [x] Compatible with MacOS X (not stable, some people have issues, doesn't work with old devices)
- - [x] Compatible with iOS (not stable, some people have issues, doesn't work with old devices)
+函数: `void click(uint8_t btn = MOUSE_LEFT)`  
+说明: 按下并释放鼠标键,默认为左键  
 
-## Installation
-- (Make sure you can use the ESP32 with the Arduino IDE. [Instructions can be found here.](https://github.com/espressif/arduino-esp32#installation-instructions))
-- [Download the latest release of this library from the release page.](https://github.com/T-vK/ESP32-BLE-Keyboard/releases)
-- In the Arduino IDE go to "Sketch" -> "Include Library" -> "Add .ZIP Library..." and select the file you just downloaded.
-- You can now go to "File" -> "Examples" -> "ESP32 BLE Keyboard" and select any of the examples to get started.
+函数: `void move(char x, char y, char wheel = 0, char hWheel = 0)`  
+说明: 移动鼠标,参数为x,y轴移动距离,滚轮和水平滚轮移动距离
 
-## Example
+函数: `void press(uint8_t btn = MOUSE_LEFT)`  
+说明: 按下鼠标键,默认为左键  
 
-``` C++
-/**
- * This example turns the ESP32 into a Bluetooth LE keyboard that writes the words, presses Enter, presses a media key and then Ctrl+Alt+Delete
- */
-#include <BleKeyboard.h>
+函数: `void release(uint8_t btn = MOUSE_LEFT)`  
+说明: 释放鼠标键,默认为左键  
 
-BleKeyboard bleKeyboard;
+函数: `void releaseAll()`  
+说明: 释放所有鼠标按键
+
+函数: `bool isPressed(uint8_t btn = MOUSE_LEFT)`  
+说明: 判断鼠标键是否被按下,默认为左键  
+
+**键盘类:BleKeyboard**  
+```
+按键分类:
+按键以KEY_开头
+1. 修饰按键:
+KEY_LEFT_CTRL
+KEY_LEFT_SHIFT
+KEY_LEFT_ALT
+KEY_LEFT_GUI
+KEY_RIGHT_CTRL
+KEY_RIGHT_SHIFT
+KEY_RIGHT_ALT
+KEY_RIGHT_GUI
+
+2. 功能按键
+KEY_UP_ARROW
+KEY_DOWN_ARROW
+KEY_LEFT_ARROW
+KEY_RIGHT_ARROW
+KEY_BACKSPACE
+KEY_TAB
+KEY_RETURN
+KEY_ESC
+KEY_INSERT
+KEY_PRTSC
+KEY_DELETE
+KEY_PAGE_UP
+KEY_PAGE_DOWN
+KEY_HOME
+KEY_END
+KEY_CAPS_LOCK
+KEY_F1
+KEY_F2
+KEY_F3
+KEY_F4
+KEY_F5
+KEY_F6
+KEY_F7
+KEY_F8
+KEY_F9
+KEY_F10
+KEY_F11
+KEY_F12
+KEY_F13
+KEY_F14
+KEY_F15
+KEY_F16
+KEY_F17
+KEY_F18
+KEY_F19
+KEY_F20
+KEY_F21
+KEY_F22
+KEY_F23
+KEY_F24
+
+3. 数字功能键
+KEY_NUM_0
+KEY_NUM_1
+KEY_NUM_2
+KEY_NUM_3
+KEY_NUM_4
+KEY_NUM_5
+KEY_NUM_6
+KEY_NUM_7
+KEY_NUM_8
+KEY_NUM_9
+KEY_NUM_SLASH
+KEY_NUM_ASTERISK
+KEY_NUM_MINUS
+KEY_NUM_PLUS
+KEY_NUM_ENTER
+KEY_NUM_PERIOD
+
+4. 媒体按键
+KEY_MEDIA_NEXT_TRACK                下一曲
+KEY_MEDIA_PREVIOUS_TRACK            上一曲
+KEY_MEDIA_STOP                      停止播放
+KEY_MEDIA_PLAY_PAUSE                播放/暂停
+KEY_MEDIA_MUTE                      静音
+KEY_MEDIA_VOLUME_UP                 音量加
+KEY_MEDIA_VOLUME_DOWN               音量减
+KEY_MEDIA_WWW_HOME                  网页主页
+KEY_MEDIA_LOCAL_MACHINE_BROWSER     本地浏览器
+KEY_MEDIA_CALCULATOR                计算器
+KEY_MEDIA_WWW_BOOKMARKS             书签
+KEY_MEDIA_WWW_SEARCH                搜索
+KEY_MEDIA_WWW_STOP                  网页停止
+KEY_MEDIA_WWW_BACK                  网页回退
+KEY_MEDIA_CONSUMER_CONTROL_CONFIGURATION    配置
+KEY_MEDIA_EMAIL_READER              邮箱客户端
+```
+
+函数: `size_t press(uint8_t k)`  
+说明: 按下指定按键  
+
+函数: `size_t press(const MediaKeyReport k)`  
+说明: 按下指定媒体按键  
+
+函数: `size_t release(uint8_t k)`  
+说明: 释放指定按键  
+
+函数: `size_t release(const MediaKeyReport k)`  
+说明: 释放指定媒体按键  
+
+函数: `size_t write(uint8_t c)`  
+说明: 键盘发送指定键值,包含按下/松开  
+
+函数: `size_t write(const MediaKeyReport c)`  
+说明: 键盘发送指定媒体键值,包含按下/松开  
+
+函数: `size_t write(const uint8_t *buffer, size_t size)`  
+说明: 键盘批量发送指定键值,可用于输出字符串,包含按下/松开  
+
+函数: `void releaseAll(void)`  
+说明: 释放所有按下的按键  
+
+## 4. 实例  
+```
+#include <BLECombo.h>
+
+BLECombo combo;
+bool isConnected = false; //最后一次连接状态
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("Starting BLE work!");
-  bleKeyboard.begin();
+  combo.begin();
 }
 
 void loop() {
-  if(bleKeyboard.isConnected()) {
-    Serial.println("Sending 'Hello world'...");
-    bleKeyboard.print("Hello world");
-
-    delay(1000);
-
-    Serial.println("Sending Enter key...");
-    bleKeyboard.write(KEY_RETURN);
-
-    delay(1000);
-
-    Serial.println("Sending Play/Pause media key...");
-    bleKeyboard.write(KEY_MEDIA_PLAY_PAUSE);
-
-    delay(1000);
-    
-   //
-   // Below is an example of pressing multiple keyboard modifiers 
-   // which by default is commented out. 
-   // 
-   /* Serial.println("Sending Ctrl+Alt+Delete...");
-    bleKeyboard.press(KEY_LEFT_CTRL);
-    bleKeyboard.press(KEY_LEFT_ALT);
-    bleKeyboard.press(KEY_DELETE);
+  if(combo.isConnected()) { // 判断键鼠是否已经连接到设备
+    isConnected = true;
+    Serial.println("按下静音按钮");
+    combo.keyboard()->write(KEY_MEDIA_MUTE);
     delay(100);
-    bleKeyboard.releaseAll();
-    */
 
+    Serial.println("音量加");
+    combo.keyboard()->write(KEY_MEDIA_VOLUME_UP);
+    delay(100);
+
+    Serial.println("音量减");
+    combo.keyboard()->write(KEY_MEDIA_VOLUME_DOWN);
+    delay(100);
+
+    Serial.println("鼠标移动");
+    combo.mouse()->move(random(-127,128), random(-127,128));
+    delay(100);
+
+    Serial.println("鼠标中键滚动");
+    combo.mouse()->move(0, 0, random(-127,128), 0);
+    delay(100);
+  } else if(isConnected) {
+    isConnected = false;
+    Serial.println("Device disconnected");
   }
-  Serial.println("Waiting 5 seconds...");
-  delay(5000);
+  delay(50);
 }
 ```
-
-## API docs
-The BleKeyboard interface is almost identical to the Keyboard Interface, so you can use documentation right here:
-https://www.arduino.cc/reference/en/language/functions/usb/keyboard/
-
-Just remember that you have to use `bleKeyboard` instead of just `Keyboard` and you need these two lines at the top of your script:
-```
-#include <BleKeyboard.h>
-BleKeyboard bleKeyboard;
-```
-
-In addition to that you can send media keys (which is not possible with the USB keyboard library). Supported are the following:
-- KEY_MEDIA_NEXT_TRACK
-- KEY_MEDIA_PREVIOUS_TRACK
-- KEY_MEDIA_STOP
-- KEY_MEDIA_PLAY_PAUSE
-- KEY_MEDIA_MUTE
-- KEY_MEDIA_VOLUME_UP
-- KEY_MEDIA_VOLUME_DOWN
-- KEY_MEDIA_WWW_HOME
-- KEY_MEDIA_LOCAL_MACHINE_BROWSER // Opens "My Computer" on Windows
-- KEY_MEDIA_CALCULATOR
-- KEY_MEDIA_WWW_BOOKMARKS
-- KEY_MEDIA_WWW_SEARCH
-- KEY_MEDIA_WWW_STOP
-- KEY_MEDIA_WWW_BACK
-- KEY_MEDIA_CONSUMER_CONTROL_CONFIGURATION // Media Selection
-- KEY_MEDIA_EMAIL_READER
-
-There is also Bluetooth specific information that you can set (optional):
-Instead of `BleKeyboard bleKeyboard;` you can do `BleKeyboard bleKeyboard("Bluetooth Device Name", "Bluetooth Device Manufacturer", 100);`. (Max lenght is 15 characters, anything beyond that will be truncated.)  
-The third parameter is the initial battery level of your device. To adjust the battery level later on you can simply call e.g.  `bleKeyboard.setBatteryLevel(50)` (set battery level to 50%).  
-By default the battery level will be set to 100%, the device name will be `ESP32 Bluetooth Keyboard` and the manufacturer will be `Espressif`.  
-There is also a `setDelay` method to set a delay between each key event. E.g. `bleKeyboard.setDelay(10)` (10 milliseconds). The default is `8`.  
-This feature is meant to compensate for some applications and devices that can't handle fast input and will skip letters if too many keys are sent in a small time frame.  
-
-## NimBLE-Mode
-The NimBLE mode enables a significant saving of RAM and FLASH memory.
-
-### Comparison (SendKeyStrokes.ino at compile-time)
-
-**Standard**
-```
-RAM:   [=         ]   9.3% (used 30548 bytes from 327680 bytes)
-Flash: [========  ]  75.8% (used 994120 bytes from 1310720 bytes)
-```
-
-**NimBLE mode**
-```
-RAM:   [=         ]   8.3% (used 27180 bytes from 327680 bytes)
-Flash: [====      ]  44.2% (used 579158 bytes from 1310720 bytes)
-```
-
-### Comparison (SendKeyStrokes.ino at run-time)
-
-|   | Standard | NimBLE mode | difference
-|---|--:|--:|--:|
-| `ESP.getHeapSize()`   | 296.804 | 321.252 | **+ 24.448**  |
-| `ESP.getFreeHeap()`   | 143.572 | 260.764 | **+ 117.192** |
-| `ESP.getSketchSize()` | 994.224 | 579.264 | **- 414.960** |
-
-## How to activate NimBLE mode?
-
-### ArduinoIDE: 
-Uncomment the first line in BleKeyboard.h
-```C++
-#define USE_NIMBLE
-```
-
-### PlatformIO:
-Change your `platformio.ini` to the following settings
-```ini
-lib_deps = 
-  NimBLE-Arduino
-
-build_flags = 
-  -D USE_NIMBLE
-```
-
-## Credits
-
-Credits to [chegewara](https://github.com/chegewara) and [the authors of the USB keyboard library](https://github.com/arduino-libraries/Keyboard/) as this project is heavily based on their work!  
-Also, credits to [duke2421](https://github.com/T-vK/ESP32-BLE-Keyboard/issues/1) who helped a lot with testing, debugging and fixing the device descriptor!
-And credits to [sivar2311](https://github.com/sivar2311) for adding NimBLE support, greatly reducing the memory footprint, fixing advertising issues and for adding the `setDelay` method.

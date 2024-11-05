@@ -145,7 +145,6 @@ private:
   void delay_ms(uint64_t ms);
 
 public:
-
   BleKeyboard(BLECombo* device);
   void begin(void);
   void end(void);
