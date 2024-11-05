@@ -1,4 +1,4 @@
-[EOT]
+[TOC]
 # ESP32-BLE-Combo库  
 ## 1. 为什么创建这个库?  
 网上搜到的ESP32键鼠库太老了,在我的手机上只能连接一次,蓝牙一掉就没法重新连接了,所以参考ESP32-BLE-Keyboard库和网上老的ESP32-BLE-Combo重写了一个键鼠库  
@@ -11,7 +11,7 @@ ESP32-BLE-Keyboard的所有功能
 鼠标点击,移动,滚轮功能,按下,释放功能  
 
 ## 3. 函数列表  
-**BLECombo类:**  
+### 3.1. BLECombo类  
 构造函数: `BLECombo(std::string deviceName = "Francis Combo", std::string deviceManufacturer = "IXYsoft", uint8_t batteryLevel = 100)`  
 ```
 参数:
@@ -42,7 +42,7 @@ batteryLevel: 电池电量
 说明: 关闭键鼠库  
 
 
-**鼠标类:BleMouse**  
+### 3.2. 鼠标类: BleMouse  
 ```
 常量:
 MOUSE_LEFT      左键
@@ -71,7 +71,7 @@ MOUSE_ALL       全部按键
 函数: `bool isPressed(uint8_t btn = MOUSE_LEFT)`  
 说明: 判断鼠标键是否被按下,默认为左键  
 
-**键盘类:BleKeyboard**  
+### 3.3 键盘类: BleKeyboard  
 ```
 按键分类:
 按键以KEY_开头
