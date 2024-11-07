@@ -1,7 +1,7 @@
 [TOC]
 # ESP32-BLE-Combo库  
 ## 1. 为什么创建这个库?  
-网上搜到的ESP32键鼠库太老了,在我的手机上只能连接一次,蓝牙一掉就没法重新连接了,所以参考ESP32-BLE-Keyboard库和网上老的ESP32-BLE-Combo重写了一个键鼠库  
+网上搜到的ESP32键鼠库太老了,在我的手机上只能连接一次,蓝牙一掉就没法重新连接了,所以参考ESP32-BLE-Keyboard库和网上老的ESP32-BLE-Combo重写了一个键鼠库,并扩展了一些功能  
 
 ## 2. 这个库实现了什么?  
 **键盘功能:**  
@@ -9,6 +9,9 @@ ESP32-BLE-Keyboard的所有功能
 
 **鼠标功能:**  
 鼠标点击,移动,滚轮功能,按下,释放功能  
+
+**触控笔功能:**
+触控笔按压,点击,释放功能
 
 ## 3. 函数列表  
 ### 3.1. BLECombo类  
@@ -20,10 +23,10 @@ deviceManufacturer: 设备制造商
 batteryLevel: 电池电量
 ```
 
-函数: `BleMouse* mouse()`  
+函数: `BLEMouse* mouse()`  
 说明: 获取鼠标对象指针
 
-函数: `BleKeyboard* keyboard()`  
+函数: `BLEKeyboard* keyboard()`  
 说明: 获取键盘对象指针
 
 函数: `bool isConnected(void)`  
@@ -42,7 +45,7 @@ batteryLevel: 电池电量
 说明: 关闭键鼠库  
 
 
-### 3.2. 鼠标类: BleMouse  
+### 3.2. 鼠标类: BLEMouse  
 ```
 常量:
 MOUSE_LEFT      左键
@@ -71,7 +74,7 @@ MOUSE_ALL       全部按键
 函数: `bool isPressed(uint8_t btn = MOUSE_LEFT)`  
 说明: 判断鼠标键是否被按下,默认为左键  
 
-### 3.3 键盘类: BleKeyboard  
+### 3.3 键盘类: BLEKeyboard  
 ```
 按键分类:
 按键以KEY_开头
@@ -187,6 +190,26 @@ KEY_MEDIA_EMAIL_READER              邮箱客户端
 
 函数: `void releaseAll(void)`  
 说明: 释放所有按下的按键  
+
+### 3.4 触控笔类: BLEPen  
+触控笔类用于模拟触控笔设备,电脑,手机端均可用  
+函数: `void touch(uint16_t x, uint16_t y, uint16_t pressure)`  
+说明: 模拟触控笔点击, (x,y)为点击位置, pressure为压力  
+
+函数: `void press(uint16_t x, uint16_t y, uint16_t pressure)`  
+说明: 模拟触控笔按压, (x,y)为点击位置, pressure为压力  
+
+函数: `void swipe(uint16_t x, uint16_t y, int16_t rx, int16_t ry, uint16_t pressure)`  
+说明: 模拟触控笔滑动, (x,y)为起始位置, (rx,ry)为滑动距离, pressure为压力  
+
+函数: `void set_resolution(uint16_t w, uint16_t h)`  
+说明: 设置触控笔控制设备的分辨率,比如手机的分辨率或者电脑屏幕分辨率  
+
+函数: `void release()`  
+说明: 释放触控笔按压  
+
+函数: `bool isPressed()`  
+说明: 判断触控笔是否释放  
 
 ## 4. 实例  
 ```

@@ -28,8 +28,9 @@
 
 #include "Print.h"
 
-class BleKeyboard;
-class BleMouse;
+class BLEKeyboard;
+class BLEMouse;
+class BLEPen;
 class BLECombo;
 
 #define BLE_KEYBOARD_VERSION "0.0.4"
@@ -132,7 +133,7 @@ typedef struct
   uint8_t keys[6];
 } KeyReport;
 
-class BleKeyboard : public Print, public BLEServerCallbacks, public BLECharacteristicCallbacks
+class BLEKeyboard : public Print, public BLEServerCallbacks, public BLECharacteristicCallbacks
 {
 private:
   BLECombo* device; // 键鼠设备
@@ -145,7 +146,7 @@ private:
   void delay_ms(uint64_t ms);
 
 public:
-  BleKeyboard(BLECombo* device);
+  BLEKeyboard(BLECombo* device);
   void begin(void);
   void end(void);
   void sendReport(KeyReport* keys);
@@ -170,7 +171,7 @@ public:
 #define MOUSE_FORWARD 16
 #define MOUSE_ALL     (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE | MOUSE_BACK | MOUSE_FORWARD)
 
-class BleMouse {
+class BLEMouse {
 private:
   BLECombo *device;
   BLECharacteristic* inputMouse;  //鼠标设备
@@ -180,7 +181,7 @@ private:
   void execute(uint8_t buttons = 0, int8_t rel_x = 0, int8_t rel_y = 0, int8_t wheel = 0, int8_t hWheel = 0);
 public:
 
-  BleMouse(BLECombo *device);
+  BLEMouse(BLECombo *device);
   void begin() {}
   void end() {}
   void click(uint8_t btn = MOUSE_LEFT);
@@ -191,11 +192,31 @@ public:
   bool isPressed(uint8_t btn = MOUSE_LEFT);
 };
 
+class BLEPen {
+private:
+  BLECombo* device;
+  BLECharacteristic* inputPen;  //鼠标设备
+  void execute(uint8_t tip_switch, uint16_t x, uint16_t y, uint16_t pressure);
+  bool _pressed = false;
+  uint16_t _w = 32767, _h = 32767;
+public:
+  BLEPen(BLECombo *device);
+  void begin() {}
+  void end() {}
+  void touch(uint16_t x, uint16_t y, uint16_t pressure); // 触摸指定点
+  void press(uint16_t x, uint16_t y, uint16_t pressure); // 按下指定点
+  void swipe(uint16_t x, uint16_t y, int16_t rx, int16_t ry, uint16_t pressure);
+  void set_resolution(uint16_t w, uint16_t h);
+  void release();                     // 释放触控笔
+  bool isPressed();                   // 触控笔是否按下
+};
+
 // 键鼠逻辑
 class BLECombo : public BLEServerCallbacks, public BLECharacteristicCallbacks {
 private:
-  BleKeyboard*        _keyboard;
-  BleMouse*           _mouse;
+  BLEKeyboard*        _keyboard;
+  BLEMouse*           _mouse;
+  BLEPen*             _pen;
   BLEHIDDevice*       hid;
   BLEAdvertising*     advertising;
   std::string         deviceName;        //蓝牙设备名
@@ -211,13 +232,15 @@ public:
   BLECharacteristic* inputKeyboard;
   BLECharacteristic* outputKeyboard;
   BLECharacteristic* inputMediaKeys;
+  BLECharacteristic* inputPen;
 
   BLECombo(std::string deviceName = "Francis Combo", std::string deviceManufacturer = "IXYsoft", uint8_t batteryLevel = 100);
   ~BLECombo();
-  void begin();
+  void begin(uint16_t w = 32767, uint16_t h = 32767);
   void end();
-  BleKeyboard *keyboard() { return _keyboard; }
-  BleMouse    *mouse() { return _mouse; }
+  BLEKeyboard *keyboard() { return _keyboard; }
+  BLEMouse    *mouse() { return _mouse; }
+  BLEPen *pen() { return _pen; }
   bool isConnected(void);
   void setBatteryLevel(uint8_t level);
   void setName(std::string deviceName);

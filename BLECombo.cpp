@@ -29,6 +29,7 @@
 #define KEYBOARD_REPORT_ID			0x01   // 键盘
 #define MEDIA_KEYBOARD_REPORT_ID    0x02   // 媒体键
 #define MOUSE_REPORT_ID             0x03   // 鼠标
+#define PEN_REPORT_ID      			0x04   // 触控笔
 
 
 static const uint8_t _hidReportDescriptor[] = {
@@ -135,19 +136,69 @@ static const uint8_t _hidReportDescriptor[] = {
   HIDINPUT(1),         0x06, //     INPUT (Data, Var, Rel)
   END_COLLECTION(0),         //   END_COLLECTION
   END_COLLECTION(0),          // END_COLLECTION
+
+	// 触控笔
+	0x05, 0x0D,        // Usage Page (Digitizer)
+	0x09, 0x02,        // Usage (Pen)
+	0xA1, 0x01,        // Collection (Application)
+	0x85, PEN_REPORT_ID,        //   Report ID (10)
+	0x09, 0x20,        //   Usage (Stylus)
+	0xA1, 0x00,        //   Collection (Physical)
+	0x09, 0x42,        //     Usage (Tip Switch)
+	0x15, 0x00,        //     Logical Minimum (0)
+	0x25, 0x01,        //     Logical Maximum (1)
+	0x35, 0x00,        //     Physical Minimum (0)
+	0x45, 0x01,        //     Physical Maximum (1)
+	0x65, 0x00,        //     Unit (None)
+	0x55, 0x00,        //     Unit Exponent (0)
+	0x75, 0x01,        //     Report Size (1)
+	0x95, 0x01,        //     Report Count (1)
+	0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	0x09, 0x44,        //     Usage (Barrel Switch)
+	0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	0x09, 0x45,        //     Usage (Eraser)
+	0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	0x95, 0x03,        //     Report Count (3)
+	0x81, 0x03,        //     Input (Const,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	0x09, 0x32,        //     Usage (In Range)
+	0x95, 0x01,        //     Report Count (1)
+	0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	0x81, 0x03,        //     Input (Const,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	0x05, 0x01,        //     Usage Page (Generic Desktop Ctrls)
+	0x09, 0x30,        //     Usage (X)
+	0x26, 0xFF, 0x7F,  //     Logical Maximum (32767)
+	0x46, 0x00, 0x08,  //     Physical Maximum (2048)
+	0x65, 0x33,        //     Unit (System: English Linear, Length: Inch)
+	0x55, 0x0D,        //     Unit Exponent (-3)
+	0x75, 0x10,        //     Report Size (16)
+	0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	0x09, 0x31,        //     Usage (Y)
+	0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	0x05, 0x0D,        //     Usage Page (Digitizer)
+	0x09, 0x30,        //     Usage (Tip Pressure)
+	0x26, 0xFF, 0x1F,  //     Logical Maximum (8191)
+	0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	0x09, 0x3D,        //     Usage (X Tilt)
+	0x25, 0x7F,        //     Logical Maximum (127)
+	0x75, 0x08,        //     Report Size (8)
+	0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	0x09, 0x3E,        //     Usage (Y Tilt)
+	0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	0xC1, 0x00,        //   End Collection
+	0xC1, 0x00,        // End Collection
 };
 
-BleKeyboard::BleKeyboard(BLECombo* device) : device(device) {
+BLEKeyboard::BLEKeyboard(BLECombo* device) : device(device) {
 	this->inputKeyboard = device->inputKeyboard;
 	this->inputMediaKeys = device->inputMediaKeys;
 	this->outputKeyboard = device->outputKeyboard;
 }
 
-void BleKeyboard::begin(void)
+void BLEKeyboard::begin(void)
 {
 }
 
-void BleKeyboard::end(void)
+void BLEKeyboard::end(void)
 {
 }
 
@@ -156,11 +207,11 @@ void BleKeyboard::end(void)
  * 
  * @param ms Time in milliseconds
  */
-void BleKeyboard::setDelay(uint32_t ms) {
+void BLEKeyboard::setDelay(uint32_t ms) {
   this->_delay_ms = ms;
 }
 
-void BleKeyboard::sendReport(KeyReport* keys)
+void BLEKeyboard::sendReport(KeyReport* keys)
 {
   if (this->device->isConnected())
   {
@@ -173,7 +224,7 @@ void BleKeyboard::sendReport(KeyReport* keys)
   }	
 }
 
-void BleKeyboard::sendReport(MediaKeyReport* keys)
+void BLEKeyboard::sendReport(MediaKeyReport* keys)
 {
   if (this->device->isConnected())
   {
@@ -330,7 +381,7 @@ uint8_t USBPutChar(uint8_t c);
 // to the persistent key report and sends the report.  Because of the way
 // USB HID works, the host acts like the key remains pressed until we
 // call release(), releaseAll(), or otherwise clear the report and resend.
-size_t BleKeyboard::press(uint8_t k)
+size_t BLEKeyboard::press(uint8_t k)
 {
 	uint8_t i;
 	if (k >= 136) {			// it's a non-printing key (not a modifier)
@@ -371,7 +422,7 @@ size_t BleKeyboard::press(uint8_t k)
 	return 1;
 }
 
-size_t BleKeyboard::press(const MediaKeyReport k)
+size_t BLEKeyboard::press(const MediaKeyReport k)
 {
     uint16_t k_16 = k[1] | (k[0] << 8);
     uint16_t mediaKeyReport_16 = _mediaKeyReport[1] | (_mediaKeyReport[0] << 8);
@@ -387,7 +438,7 @@ size_t BleKeyboard::press(const MediaKeyReport k)
 // release() takes the specified key out of the persistent key report and
 // sends the report.  This tells the OS the key is no longer pressed and that
 // it shouldn't be repeated any more.
-size_t BleKeyboard::release(uint8_t k)
+size_t BLEKeyboard::release(uint8_t k)
 {
 	uint8_t i;
 	if (k >= 136) {			// it's a non-printing key (not a modifier)
@@ -418,7 +469,7 @@ size_t BleKeyboard::release(uint8_t k)
 	return 1;
 }
 
-size_t BleKeyboard::release(const MediaKeyReport k)
+size_t BLEKeyboard::release(const MediaKeyReport k)
 {
     uint16_t k_16 = k[1] | (k[0] << 8);
     uint16_t mediaKeyReport_16 = _mediaKeyReport[1] | (_mediaKeyReport[0] << 8);
@@ -430,7 +481,7 @@ size_t BleKeyboard::release(const MediaKeyReport k)
 	return 1;
 }
 
-void BleKeyboard::releaseAll(void)
+void BLEKeyboard::releaseAll(void)
 {
 	_keyReport.keys[0] = 0;
 	_keyReport.keys[1] = 0;
@@ -445,21 +496,21 @@ void BleKeyboard::releaseAll(void)
 	sendReport(&_mediaKeyReport);
 }
 
-size_t BleKeyboard::write(uint8_t c)
+size_t BLEKeyboard::write(uint8_t c)
 {
 	uint8_t p = press(c);  // Keydown
 	release(c);            // Keyup
 	return p;              // just return the result of press() since release() almost always returns 1
 }
 
-size_t BleKeyboard::write(const MediaKeyReport c)
+size_t BLEKeyboard::write(const MediaKeyReport c)
 {
 	uint16_t p = press(c);  // Keydown
 	release(c);            // Keyup
 	return p;              // just return the result of press() since release() almost always returns 1
 }
 
-size_t BleKeyboard::write(const uint8_t *buffer, size_t size) {
+size_t BLEKeyboard::write(const uint8_t *buffer, size_t size) {
 	size_t n = 0;
 	while (size--) {
 		if (*buffer != '\r') {
@@ -474,7 +525,7 @@ size_t BleKeyboard::write(const uint8_t *buffer, size_t size) {
 	return n;
 }
 
-void BleKeyboard::delay_ms(uint64_t ms) {
+void BLEKeyboard::delay_ms(uint64_t ms) {
   uint64_t m = esp_timer_get_time();
   if(ms){
     uint64_t e = (m + (ms * 1000));
@@ -487,11 +538,11 @@ void BleKeyboard::delay_ms(uint64_t ms) {
 
 
 // 鼠标逻辑
-BleMouse::BleMouse(BLECombo* device) : device(device) {
+BLEMouse::BLEMouse(BLECombo* device) : device(device) {
 	this->inputMouse = device->inputMouse;
 }
 
-void BleMouse::execute(uint8_t buttons, int8_t rel_x, int8_t rel_y, int8_t wheel, int8_t hWheel) {
+void BLEMouse::execute(uint8_t buttons, int8_t rel_x, int8_t rel_y, int8_t wheel, int8_t hWheel) {
 	if(device->isConnected()) {
 		uint8_t params[5];
 		params[0] = buttons;
@@ -506,37 +557,103 @@ void BleMouse::execute(uint8_t buttons, int8_t rel_x, int8_t rel_y, int8_t wheel
 	}
 }
 
-void BleMouse::move(char x, char y, char wheel, char hWheel) {
+void BLEMouse::move(char x, char y, char wheel, char hWheel) {
 	execute(_buttons, x, y, wheel, hWheel);
 }
 
-void BleMouse::click(uint8_t btn) {
+void BLEMouse::click(uint8_t btn) {
 	execute(btn);
 	execute(0);
 }
 
-void BleMouse::buttons(uint8_t btns) {
+void BLEMouse::buttons(uint8_t btns) {
 	if(btns != _buttons) {	// 按下的按钮变更
 		execute(btns);
 	}
 }
 
-void BleMouse::press(uint8_t btn) {
+void BLEMouse::press(uint8_t btn) {
 	execute(btn | _buttons);
 }
 
-void BleMouse::release(uint8_t btn) {
+void BLEMouse::release(uint8_t btn) {
 	execute(_buttons & ~btn);
 }
 
-void BleMouse::releaseAll() {
+void BLEMouse::releaseAll() {
 	execute();
 }
 
-bool BleMouse::isPressed(uint8_t btn) {
+bool BLEMouse::isPressed(uint8_t btn) {
 	return (_buttons & btn) != 0;
 }
 
+// 触摸屏逻辑
+BLEPen::BLEPen(BLECombo* device) : device(device) {
+	this->inputPen = device->inputPen;
+}
+
+void BLEPen::execute(uint8_t tip_switch, uint16_t x, uint16_t y, uint16_t pressure = 0) {
+	struct {
+		uint8_t tip_switch:1;
+        uint8_t barrel_switch:1;
+        uint8_t eraser:1;
+        uint8_t _reserved1:3;
+        uint8_t in_range:1;
+        uint8_t _reserved2:1;
+	} state = {0};
+	state.tip_switch = !!tip_switch;
+	state.in_range = !!tip_switch;
+	state.barrel_switch = !!tip_switch;
+
+	x = x * 32768 / _w;
+	y = y * 32768 / _h;
+
+	uint8_t params[9];
+	params[0] = *(uint8_t*)&state;	// Tip Switch, InRange, Confidence
+	// params[1] = 1;			// ID
+	params[1] = (x & 0xFF);	// X lSB
+	params[2] = ((x >> 8) & 0xFF);	// X MSB
+	params[3] = (y & 0xFF);	// Y LSB
+	params[4] = ((y >> 8) & 0xFF);	// Y MSB
+	params[5] = (pressure & 0xFF);
+	params[6] = ((pressure >> 8) & 0xFF);
+	params[7] = 0;
+	params[8] = 0;
+	inputPen->setValue(params, sizeof(params));
+	inputPen->notify();
+}
+
+void BLEPen::press(uint16_t x, uint16_t y, uint16_t pressure) {
+	execute(1, x, y, pressure);
+	_pressed = true;
+}
+
+void BLEPen::release() {
+	execute(0, 0, 0, 0);
+	_pressed = false;
+}
+
+void BLEPen::touch(uint16_t x, uint16_t y, uint16_t pressure) {
+	press(x, y, pressure);
+	release();
+}
+
+void BLEPen::swipe(uint16_t x, uint16_t y, int16_t rx, int16_t ry, uint16_t pressure) {
+	press(x, y, pressure);
+	press(x+rx/2, y+ry/2, pressure);
+	press(x+rx, y+ry, pressure);
+	release();
+}
+
+void BLEPen::set_resolution(uint16_t w, uint16_t h) {
+	_w = (w > 32767 || w == 0) ? 32767 : w;
+	_h = (h > 32767 || h == 0) ? 32767 : h;
+}
+
+bool BLEPen::isPressed() {
+	return _pressed;
+}
 
 // 键鼠逻辑
 BLECombo::BLECombo(std::string deviceName, std::string deviceManufacturer, uint8_t batteryLevel)
@@ -549,15 +666,16 @@ BLECombo::~BLECombo() {
 	delete this->hid;
 	delete this->_keyboard;
 	delete this->_mouse;
+	delete this->_pen;
 }
 
 
-void BLECombo::begin(void)
+void BLECombo::begin(uint16_t w, uint16_t h)
 {
   BLEDevice::init(deviceName.c_str());		//初始化BLE设备名
   BLEServer* pServer = BLEDevice::createServer();
   pServer->setCallbacks(this);
-	
+
 
   hid = new BLEHIDDevice(pServer);
   // 键盘HID
@@ -568,8 +686,14 @@ void BLECombo::begin(void)
   // 鼠标HID
   inputMouse = hid->inputReport(MOUSE_REPORT_ID);
 
-	_mouse = new BleMouse(this);		//初始化鼠标
-	_keyboard = new BleKeyboard(this);	//初始化键盘
+  // 触摸屏HID
+  inputPen = hid->inputReport(PEN_REPORT_ID);
+
+	_mouse = new BLEMouse(this);		//初始化鼠标
+	_keyboard = new BLEKeyboard(this);	//初始化键盘
+	_pen = new BLEPen(this);	//初始化触摸屏
+
+	_pen->set_resolution(w, h);
 
   outputKeyboard->setCallbacks(this);
 
@@ -619,6 +743,10 @@ void BLECombo::onConnect(BLEServer* pServer) {
   desc = (BLE2902*)this->inputMouse->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
   desc->setNotifications(true);
 
+  // 触摸屏标记
+  desc = (BLE2902*)this->inputPen->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
+  desc->setNotifications(true);
+
 #endif // !USE_NIMBLE
 
 }
@@ -635,6 +763,10 @@ void BLECombo::onDisconnect(BLEServer* pServer) {
   // 鼠标标记释放
   desc = (BLE2902*)this->inputMouse->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
   desc->setNotifications(false);  
+
+  // 触摸屏标记释放
+  desc = (BLE2902*)this->inputPen->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
+  desc->setNotifications(false);
 
   advertising->start();
 
